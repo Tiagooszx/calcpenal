@@ -269,9 +269,18 @@ function inicializar() {
     enviarRegistroBtn.addEventListener('click', async () => {
       try {
         // Validar campos obrigatórios
-        const prisaoPorId = document.getElementById('prisao_por_id').value;
-        const prisaoPorNome = document.getElementById('prisao_por_nome').value;
-        const relatorio = document.getElementById('relatorio_acao').value;
+        const prisaoPorIdEl = document.getElementById('prisao_por_id');
+        const prisaoPorNomeEl = document.getElementById('prisao_por_nome');
+        const relatorioEl = document.getElementById('relatorio_acao');
+
+        if (!prisaoPorIdEl || !prisaoPorNomeEl || !relatorioEl) {
+          alert('⚠️ Erro: Campos do formulário não encontrados!');
+          return;
+        }
+
+        const prisaoPorId = prisaoPorIdEl.value;
+        const prisaoPorNome = prisaoPorNomeEl.value;
+        const relatorio = relatorioEl.value;
 
         if (!prisaoPorId || !prisaoPorNome || !relatorio) {
           alert('⚠️ Preencha os campos obrigatórios: ID de quem prendeu, Nome e Relatório!');
@@ -279,18 +288,48 @@ function inicializar() {
         }
 
         // Coletar dados da ficha
-        const nome = document.getElementById('nome').value;
-        const passaporte = document.getElementById('idacus').value;
-        const reducao = document.getElementById('f-reduc').textContent;
-        const penaReduzida = document.getElementById('f-total-red').textContent;
-        const multa = document.getElementById('f-multa').textContent;
+        const nomeEl = document.getElementById('nome');
+        const passaporteEl = document.getElementById('idacus');
+        const reducaoEl = document.getElementById('f-reduc');
+        const penaReduzidaEl = document.getElementById('f-total-red');
+        const multaEl = document.getElementById('f-multa');
+        const fiancaPagaEl = document.getElementById('f-fianca-paid');
+
+        const nome = nomeEl.value;
+        const passaporte = passaporteEl.value;
+        const reducao = reducaoEl.textContent || '0%';
+        const penaReduzida = penaReduzidaEl.textContent || '0';
+        const multa = multaEl.textContent || '0,00';
         
-        // CORREÇÃO: Pegar apenas "Sim" ou "Não" do texto completo
-        const fiancaPagaTexto = document.getElementById('f-fianca-paid').textContent;
+        // CORREÇÃO: Verificar texto completo de fiança paga
+        const fiancaPagaTexto = fiancaPagaEl.textContent;
         const fiancaPaga = fiancaPagaTexto.includes('Sim') ? 'Sim' : 'Não';
         
-        // CORREÇÃO: Pegar apenas o valor da fiança sem o "R$"
-        const fiancaCompleta = document.getElementById('f-fianca').textContent;
+        // CORREÇÃO: Buscar valor da fiança (pode não existir se for crime inafiançável)
+        const fiancaEl = document.getElementById('f-fianca');
+        let fiancaCompleta = '0,00';
+        
+        if (fiancaEl) {
+          // Elemento existe - crime com fiança normal
+          fiancaCompleta = fiancaEl.textContent || '0,00';
+        } else {
+          // Elemento NÃO existe - pode ser crime inafiançável
+          // Tentar pegar do card de fiança
+          const valorFiancaCard = document.getElementById('valorFianca');
+          if (valorFiancaCard) {
+            fiancaCompleta = valorFiancaCard.textContent || '0,00';
+          }
+        }
+
+        if (!nome || !passaporte) {
+          alert('⚠️ Preencha o nome e passaporte do acusado!');
+          return;
+        }
+
+        if (selected.size === 0) {
+          alert('⚠️ Selecione pelo menos um artigo!');
+          return;
+        }
 
         const crimesLista = Array.from(selected.values())
           .map(a => `• ${a.text}`)
@@ -304,12 +343,14 @@ function inicializar() {
           ? Array.from(attenuantesSelected).join(', ')
           : 'Nenhum';
 
-        // FORMATAR PRISÃO POR (Nome | ID)
         const prisaoPorFormatado = `${prisaoPorNome} | ${prisaoPorId}`;
 
-        // FORMATAR POLICIAIS ENVOLVIDOS (Nome | ID, Nome | ID)
-        const policiaisIds = document.getElementById('policiais_ids').value || '';
-        const policiaisNomes = document.getElementById('policiais_nomes').value || '';
+        const policiaisIdsEl = document.getElementById('policiais_ids');
+        const policiaisNomesEl = document.getElementById('policiais_nomes');
+        const juridicoNomeEl = document.getElementById('juridico_nome');
+
+        const policiaisIds = policiaisIdsEl ? policiaisIdsEl.value : '';
+        const policiaisNomes = policiaisNomesEl ? policiaisNomesEl.value : '';
         
         let policiaisFormatado = '';
         if (policiaisIds && policiaisNomes) {
@@ -323,10 +364,8 @@ function inicializar() {
           policiaisFormatado = policiaisArray.join(', ');
         }
 
-        // Criar FormData
         const formData = new FormData();
         
-        // Dados da ficha
         formData.append('nome', nome);
         formData.append('passaporte', passaporte);
         formData.append('crimes', crimesLista);
@@ -335,29 +374,27 @@ function inicializar() {
         formData.append('atenuantes', atenuantesLista);
         formData.append('pena', penaReduzida + ' meses');
         formData.append('multa', 'R$ ' + multa);
-        formData.append('fianca_paga', fiancaPaga); // CORRIGIDO: apenas "Sim" ou "Não"
-        formData.append('fianca', 'R$ ' + fiancaCompleta); // CORRIGIDO: com R$
-        
-        // Dados do registro (COM FORMATAÇÃO)
+        formData.append('fianca_paga', fiancaPaga);
+        formData.append('fianca', 'R$ ' + fiancaCompleta);
         formData.append('prisao_por_id', prisaoPorId);
         formData.append('prisao_por', prisaoPorFormatado);
         formData.append('policiais_ids', policiaisIds);
         formData.append('policiais', policiaisFormatado);
-        formData.append('juridico', document.getElementById('juridico_nome').value || '');
+        formData.append('juridico', juridicoNomeEl ? juridicoNomeEl.value : '');
         formData.append('relatorio', relatorio);
 
-        // Anexar imagens com os nomes corretos
-        const fotoInv = document.getElementById('foto_inventario')?.files[0];
-        const fotoMdt = document.getElementById('foto_mdt')?.files[0];
-        const fotoOab = document.getElementById('foto_oab')?.files[0];
-        const fotoRgMask = document.getElementById('foto_rg_mask')?.files[0];
-        const fotoRg = document.getElementById('foto_rg')?.files[0];
+        // Anexar imagens
+        const fotoInvEl = document.getElementById('foto_inventario');
+        const fotoMdtEl = document.getElementById('foto_mdt');
+        const fotoOabEl = document.getElementById('foto_oab');
+        const fotoRgMaskEl = document.getElementById('foto_rg_mask');
+        const fotoRgEl = document.getElementById('foto_rg');
 
-        if (fotoInv) formData.append('foto_inventario', fotoInv);
-        if (fotoMdt) formData.append('foto_mdt', fotoMdt);
-        if (fotoOab) formData.append('foto_oab', fotoOab);
-        if (fotoRgMask) formData.append('foto_rg_mask', fotoRgMask);
-        if (fotoRg) formData.append('foto_rg', fotoRg);
+        if (fotoInvEl?.files[0]) formData.append('foto_inventario', fotoInvEl.files[0]);
+        if (fotoMdtEl?.files[0]) formData.append('foto_mdt', fotoMdtEl.files[0]);
+        if (fotoOabEl?.files[0]) formData.append('foto_oab', fotoOabEl.files[0]);
+        if (fotoRgMaskEl?.files[0]) formData.append('foto_rg_mask', fotoRgMaskEl.files[0]);
+        if (fotoRgEl?.files[0]) formData.append('foto_rg', fotoRgEl.files[0]);
 
         // Enviar para o servidor
         const response = await fetch('api/registrar.php', {
@@ -365,27 +402,31 @@ function inicializar() {
           body: formData
         });
 
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
         const data = await response.json();
 
         if (data.success) {
           alert('✅ Prisão registrada com sucesso!\n📊 ID da Ficha: ' + data.id);
-          document.getElementById('registroModal').style.display = 'none';
+          
+          const modalEl = document.getElementById('registroModal');
+          if (modalEl) modalEl.style.display = 'none';
           
           // Limpar campos
-          document.getElementById('prisao_por_id').value = '';
-          document.getElementById('prisao_por_nome').value = '';
-          document.getElementById('policiais_ids').value = '';
-          document.getElementById('policiais_nomes').value = '';
-          document.getElementById('juridico_nome').value = '';
-          document.getElementById('relatorio_acao').value = '';
+          if (prisaoPorIdEl) prisaoPorIdEl.value = '';
+          if (prisaoPorNomeEl) prisaoPorNomeEl.value = '';
+          if (policiaisIdsEl) policiaisIdsEl.value = '';
+          if (policiaisNomesEl) policiaisNomesEl.value = '';
+          if (juridicoNomeEl) juridicoNomeEl.value = '';
+          if (relatorioEl) relatorioEl.value = '';
           
-          // Limpar previews de imagem
           document.querySelectorAll('.brp-paste-preview').forEach(preview => {
             preview.innerHTML = '<span>Clique para selecionar ou cole a imagem aqui (Ctrl+V)</span>';
             preview.classList.remove('has-image');
           });
           
-          // Limpar inputs de arquivo
           const inputs = ['foto_inventario', 'foto_mdt', 'foto_oab', 'foto_rg_mask', 'foto_rg'];
           inputs.forEach(id => {
             const input = document.getElementById(id);
@@ -395,7 +436,7 @@ function inicializar() {
           alert('❌ Erro ao registrar prisão: ' + data.error);
         }
       } catch (error) {
-        console.error('Erro:', error);
+        console.error('Erro completo:', error);
         alert('❌ Erro ao enviar dados: ' + error.message);
       }
     });
