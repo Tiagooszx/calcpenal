@@ -305,19 +305,29 @@ function inicializar() {
         const fiancaPagaTexto = fiancaPagaEl.textContent;
         const fiancaPaga = fiancaPagaTexto.includes('Sim') ? 'Sim' : 'Não';
         
-        // CORREÇÃO: Buscar valor da fiança (pode não existir se for crime inafiançável)
-        const fiancaEl = document.getElementById('f-fianca');
+        // CORREÇÃO COMPLETA: Buscar valor da fiança de forma segura
         let fiancaCompleta = '0,00';
         
-        if (fiancaEl) {
-          // Elemento existe - crime com fiança normal
-          fiancaCompleta = fiancaEl.textContent || '0,00';
+        // Tentar pegar do span f-fianca (quando não é crime inafiançável)
+        const fiancaEl = document.getElementById('f-fianca');
+        if (fiancaEl && fiancaEl.textContent) {
+          fiancaCompleta = fiancaEl.textContent;
         } else {
-          // Elemento NÃO existe - pode ser crime inafiançável
-          // Tentar pegar do card de fiança
-          const valorFiancaCard = document.getElementById('valorFianca');
-          if (valorFiancaCard) {
-            fiancaCompleta = valorFiancaCard.textContent || '0,00';
+          // Se não existir, verificar se é crime inafiançável
+          const fiancaContainer = document.getElementById('f-fianca-container');
+          if (fiancaContainer) {
+            const textoContainer = fiancaContainer.textContent;
+            
+            // Se for crime inafiançável, deixar 0,00
+            if (textoContainer.includes('inafiançável')) {
+              fiancaCompleta = '0,00';
+            } else {
+              // Tentar extrair valor do card de fiança
+              const valorFiancaCard = document.getElementById('valorFianca');
+              if (valorFiancaCard) {
+                fiancaCompleta = valorFiancaCard.textContent || '0,00';
+              }
+            }
           }
         }
 
