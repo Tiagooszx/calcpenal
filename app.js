@@ -1,3 +1,6 @@
+// CONFIGURAÇÃO DA API (adicione no início do arquivo, após inicializar())
+const API_URL = 'https://calcpenalphp-production.up.railway.app';
+
 // Aguardar DOM carregar completamente
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', inicializar);
@@ -407,7 +410,7 @@ function inicializar() {
         if (fotoRgEl?.files[0]) formData.append('foto_rg', fotoRgEl.files[0]);
 
         // Enviar para o servidor
-        const response = await fetch('/calcpenal/api/registrar.php', {  // Caminho absoluto
+        const response = await fetch(`${API_URL}/api/registrar.php`, {
           method: 'POST',
           body: formData
         });
@@ -659,7 +662,7 @@ function inicializar() {
     resultado.innerHTML = '<div style="text-align: center; color: var(--brp-accent);">🔍 Buscando...</div>';
 
     try {
-      const response = await fetch(`api/buscar.php?tipo=antecedentes&id=${encodeURIComponent(id)}`);
+      const response = await fetch(`${API_URL}/api/buscar.php?tipo=antecedentes&id=${encodeURIComponent(id)}`);
       const data = await response.json();
 
       if (data.success) {
@@ -726,7 +729,7 @@ function inicializar() {
     resultado.innerHTML = '<div style="text-align: center; color: var(--brp-accent);">🔍 Buscando...</div>';
 
     try {
-      const response = await fetch(`api/buscar.php?tipo=ficha&id=${encodeURIComponent(id)}`);
+      const response = await fetch(`${API_URL}/api/buscar.php?tipo=ficha&id=${encodeURIComponent(id)}`);
       const data = await response.json();
 
       if (data.success) {
@@ -794,7 +797,7 @@ function inicializar() {
     resultado.innerHTML = '<div style="text-align: center; color: var(--brp-accent);">🔍 Buscando...</div>';
 
     try {
-      const response = await fetch(`api/buscar.php?tipo=policial&id=${encodeURIComponent(id)}`);
+      const response = await fetch(`${API_URL}/api/buscar.php?tipo=policial&id=${encodeURIComponent(id)}`);
       const data = await response.json();
 
       if (data.success) {
