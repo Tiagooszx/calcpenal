@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CALCULADORA PENAL</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <button class="theme-toggle" id="themeToggle">🌙</button>
+
+  <div class="brp-wrap">
+    <div class="brp-header">
+      <div class="brp-header-top">
+        <div class="brp-title">CALCULADORA PENAL</div>
+        <img src="logo/logobrasil.png" alt="BRP Roleplay" class="brp-logo">
+      </div>
+      <div class="brp-row">
+        <div class="brp-field">NOME DO ACUSADO: <input id="nome" type="text" placeholder="Nome do acusado..." /></div>
+        <div class="brp-field">ID DO ACUSADO: <input id="idacus" type="text" placeholder="ID/Passaporte..." /></div>
+        <div class="brp-field">
+          FIANÇA:
+          <label><input type="radio" name="f" value="sim" id="fiancaSim" /> SIM</label>
+          <label><input type="radio" name="f" value="nao" id="fiancaNao" checked /> NÃO</label>
+        </div>
+      </div>
+
+      <!-- AVISO DE CRIME INAFIANÇÁVEL -->
+      <div id="avisoInafiancavel" class="brp-aviso-inafiancavel" style="display: none;">
+        <strong>⚠️ CRIME INAFIANÇÁVEL DETECTADO!</strong>
+        <p>Este acusado possui um ou mais crimes inafiançáveis. A opção de fiança foi desabilitada.</p>
+      </div>
+
+      <div class="brp-cards">
+        <div class="brp-card">
+          <div class="brp-card-label">VALOR DA MULTA</div>
+          <div class="brp-card-value">R$ <span id="valorMulta">0,00</span></div>
+        </div>
+        <div class="brp-card">
+          <div class="brp-card-label">VALOR DA FIANÇA</div>
+          <div class="brp-card-value">R$ <span id="valorFianca">0,00</span></div>
+        </div>
+        <div class="brp-card">
+          <div class="brp-card-label">REDUÇÃO</div>
+          <div class="brp-card-value"><span id="reduc">0%</span></div>
+        </div>
+        <div class="brp-card">
+          <div class="brp-card-label">PENA TOTAL</div>
+          <div class="brp-card-value"><span id="totalpena">0</span> meses</div>
+        </div>
+      </div>
+    </div>
+    <div class="brp-main">
+      <div class="brp-list-panel">
+        <div class="brp-list-title">ARTIGOS</div>
+        <div class="brp-search">
+          <input id="search" placeholder="Buscar artigo..." />
+          <button id="btnclear">Limpar</button>
+        </div>
+        <div id="articles" class="brp-articles-list"></div>
+      </div>
+      <div class="brp-attenuantes-panel">
+        <div class="brp-attenuantes-title">ATENUANTES</div>
+        <div class="brp-attenuantes-list" id="attenuantes">
+          <div class="brp-att-item" data-id="Jurídico Constituído" data-reduc="30" title="30% DE REDUÇÃO NO TOTAL DA PENA. APENAS COM UM MEMBRO JURÍDICO PRESENTE. O OFICIAL DE PRISÃO E/OU O INDIVÍDUO DEVEM CONTATAR UM MEMBRO DO CORPO JURÍDICO NA CALL DE SERVIÇOS NO CELULAR. É DIREITO DO RÉU TER UM DEFENSOR PÚBLICO OU UM MEMBRO DO CORPO JURÍDICO. A POLÍCIA É OBRIGADA POR LEI A ESPERAR POR ATÉ 15 MINUTOS.">Jurídico Constituído</div>
+          <div class="brp-att-item" data-id="Réu Primário" data-reduc="10" data-requires="Jurídico Constituído" title="10% DE REDUÇÃO NO TOTAL DA PENA. APENAS COM UM MEMBRO JURÍDICO PRESENTE.">Réu Primário</div>
+          <div class="brp-att-item" data-id="Réu Confesso" data-reduc="10" data-requires="Jurídico Constituído" title="10% DE REDUÇÃO NO TOTAL DA PENA. APENAS COM UM MEMBRO JURÍDICO PRESENTE.">Réu Confesso</div>
+          <div class="brp-att-item" data-id="Colaboração" data-reduc="10" title="10% DE REDUÇÃO NO TOTAL DA PENA. O POLICIAL PODE REGISTRAR ESSE ATENUANTE SEM A PRESENÇA DE UM MEMBRO DO JURÍDICO.">Colaboração</div>
+          <div class="brp-att-item" data-id="Porte de Arma Legal" data-reduc="10" title="10% DE REDUÇÃO NO TOTAL DA PENA. O POLICIAL PODE REGISTRAR ESSE ATENUANTE SEM A PRESENÇA DE UM MEMBRO DO JURÍDICO.">Porte de Arma Legal</div>
+          <div class="brp-att-item" data-id="Delação Premiada" data-reduc="50" title="AUTORIZADA APENAS EM PRISÕES EFETUADAS PELOS DELEGADOS INVESTIGATIVOS E/OU AUTORIZADOS DA DIVISÃO DE INVESTIGAÇÃO.">Delação Premiada</div>
+        </div>
+      </div>
+<div class="brp-summary-panel">
+  <div class="brp-ficha-title">FICHA CRIMINAL</div>
+
+  <div class="brp-ficha-line"><strong>NOME DO ACUSADO:</strong> <span id="f-nome"></span></div>
+  <div class="brp-ficha-line"><strong>PASSAPORTE DO ACUSADO:</strong> <span id="f-id"></span></div>
+
+  <div class="brp-ficha-line"><strong>CRIMES COMETIDOS:</strong></div>
+  <ul id="f-crimes" class="brp-ficha-list"></ul>
+
+  <div class="brp-ficha-line"><strong>TOTAL DA PENA:</strong> <span id="f-total">0</span> meses</div>
+  <div class="brp-ficha-line"><strong>ATENUANTES:</strong> <span id="f-atten">Nenhum</span></div>
+  <div class="brp-ficha-line"><strong>REDUÇÃO APLICADA:</strong> <span id="f-reduc">0%</span></div>
+  <div class="brp-ficha-line"><strong>TOTAL DA PENA REDUZIDA:</strong> <span id="f-total-red">0</span> meses</div>
+  <div class="brp-ficha-line"><strong>TOTAL DE MULTA:</strong> R$ <span id="f-multa">0,00</span></div>
+  <div class="brp-ficha-line"><strong>FIANÇA PAGA:</strong> <span id="f-fianca-paid">Não</span></div>
+  <div class="brp-ficha-line"><strong>VALOR TOTAL DA FIANÇA:</strong> R$ <span id="f-fianca">0,00</span></div>
+
+  <!-- 🔥 Mantendo os botões exatamente como você pediu -->
+  <div class="brp-buttons">
+    <button class="brp-btn" id="calc">Calcular Pena</button>
+    <button class="brp-btn" id="copy">Copiar Pena</button>
+    <button class="brp-btn" id="codigo">Código Penal</button>
+    <button class="brp-btn" id="limpar">Limpar Tudo</button>
+  </div> 
+</div>
+
+
+  <!-- MODAL CHECKLIST -->
+  <div id="checklistModal" class="brp-modal">
+    <div class="brp-modal-content">
+      <button class="brp-modal-close" id="closeModal">&times;</button>
+      <h2>CHECKLIST DE PROCEDIMENTOS: LEIA COM ATENÇÃO</h2>
+      <p>Leia atentamente todos os respectivos itens obrigatórios para validação da sua prisão.<br>
+      O seu registro de prisão estará correto quando todos os requisitos abaixo forem selecionados.<br>
+      Selecionar o item é a confirmação de que tudo foi feito conforme o checklist de Prisão da Lótus Group.<br>
+      Há itens que podem não estar envolvidos no seu tipo de prisão, selecione apenas para completar a ação de copiar.</p>
+
+      <div class="brp-checklist-grid">
+        <div class="brp-checklist-item">
+          <input type="checkbox" id="c1" />
+          <label for="c1">LEI DE MIRANDA: ANTES DE CHEGAR NA DELEGACIA</label>
+        </div>
+        <div class="brp-checklist-item">
+          <input type="checkbox" id="c2" />
+          <label for="c2">REVISTA DE SEXO OPOSTO: FEITO COM MÉTODO DE CAIXA</label>
+        </div>
+        <div class="brp-checklist-item">
+          <input type="checkbox" id="c3" />
+          <label for="c3">FOTO DO INVENTÁRIO (PRINT DE TELA INTEIRA)</label>
+        </div>
+        <div class="brp-checklist-item">
+          <input type="checkbox" id="c4" />
+          <label for="c4">FOTO DO INVENTÁRIO DO VEÍCULO (PRINT DE TELA INTEIRA)</label>
+        </div>
+        <div class="brp-checklist-item">
+          <input type="checkbox" id="c5" />
+          <label for="c5">FOTO DO ROSTO COM RG ABERTO (PRINT DE TELA INTEIRA)</label>
+        </div>
+        <div class="brp-checklist-item">
+          <input type="checkbox" id="c6" />
+          <label for="c6">FOTO DO CORPO COM RG ABERTO (PRINT DE TELA INTEIRA)</label>
+        </div>
+        <div class="brp-checklist-item">
+          <input type="checkbox" id="c7" />
+          <label for="c7">CRIME DE OCULTAÇÃO FACIAL: FOTO COM E SEM MÁSCARA</label>
+        </div>
+        <div class="brp-checklist-item">
+          <input type="checkbox" id="c8" />
+          <label for="c8">VERIFICADO SE HÁ USO DE COLDRE OU COLETE (ROUPA) VISÍVEL</label>
+        </div>
+        <div class="brp-checklist-item">
+          <input type="checkbox" id="c9" />
+          <label for="c9">FOTO DA CALCULADORA (PRINT DE TELA INTEIRA)</label>
+        </div>
+        <div class="brp-checklist-item">
+          <input type="checkbox" id="c10" />
+          <label for="c10">RELATÓRIO DA AÇÃO COM QUANTITATIVO DE ITENS DO INVENTÁRIO</label>
+        </div>
+        <div class="brp-checklist-item">
+          <input type="checkbox" id="c11" />
+          <label for="c11">MARCAR TODOS OS ENVOLVIDOS: POLICIAIS E JURÍDICO</label>
+        </div>
+      </div>
+
+      <div class="brp-modal-inputs">
+        <label>Jurídico Envolvido: <input type="text" id="juridico" placeholder="Nome do jurídico..." /></label>
+        <label>Relatório da Ação: <textarea id="relatorio" placeholder="Descreva a ação..."></textarea></label>
+      </div>
+
+      <button class="brp-btn-modal" id="copiarComChecklist">COPIAR PENA</button>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
