@@ -26,12 +26,6 @@
         </div>
       </div>
 
-      <!-- AVISO DE CRIME INAFIANÇÁVEL -->
-      <div id="avisoInafiancavel" class="brp-aviso-inafiancavel" style="display: none;">
-        <strong>⚠️ CRIME INAFIANÇÁVEL DETECTADO!</strong>
-        <p>Este acusado possui um ou mais crimes inafiançáveis. A opção de fiança foi desabilitada.</p>
-      </div>
-
       <div class="brp-cards">
         <div class="brp-card">
           <div class="brp-card-label">VALOR DA MULTA</div>
@@ -86,83 +80,145 @@
   <div class="brp-ficha-line"><strong>TOTAL DA PENA REDUZIDA:</strong> <span id="f-total-red">0</span> meses</div>
   <div class="brp-ficha-line"><strong>TOTAL DE MULTA:</strong> R$ <span id="f-multa">0,00</span></div>
   <div class="brp-ficha-line"><strong>FIANÇA PAGA:</strong> <span id="f-fianca-paid">Não</span></div>
-  <div class="brp-ficha-line"><strong>VALOR TOTAL DA FIANÇA:</strong> R$ <span id="f-fianca">0,00</span></div>
+  <div class="brp-ficha-line"><strong>VALOR TOTAL DA FIANÇA:</strong> <span id="f-fianca-container">R$ <span id="f-fianca">0,00</span></span></div>
 
-  <!-- 🔥 Mantendo os botões exatamente como você pediu -->
   <div class="brp-buttons">
     <button class="brp-btn" id="calc">Calcular Pena</button>
-    <button class="brp-btn" id="copy">Copiar Pena</button>
-    <button class="brp-btn" id="codigo">Código Penal</button>
+    <button class="brp-btn" id="registrar">Registrar Prisão</button>
     <button class="brp-btn" id="limpar">Limpar Tudo</button>
+    <button class="brp-btn" id="buscarAntecedentes">Buscar Antecedentes</button>
+    <button class="brp-btn" id="buscarFicha">Buscar Ficha</button>
+    <button class="brp-btn" id="buscarPolicial">Buscar Policial</button>
   </div> 
 </div>
 
 
-  <!-- MODAL CHECKLIST -->
-  <div id="checklistModal" class="brp-modal">
+  <!-- MODAL BUSCAR ANTECEDENTES -->
+  <div id="antecedentesModal" class="brp-modal">
     <div class="brp-modal-content">
-      <button class="brp-modal-close" id="closeModal">&times;</button>
-      <h2>CHECKLIST DE PROCEDIMENTOS: LEIA COM ATENÇÃO</h2>
-      <p>Leia atentamente todos os respectivos itens obrigatórios para validação da sua prisão.<br>
-      O seu registro de prisão estará correto quando todos os requisitos abaixo forem selecionados.<br>
-      Selecionar o item é a confirmação de que tudo foi feito conforme o checklist de Prisão da Lótus Group.<br>
-      Há itens que podem não estar envolvidos no seu tipo de prisão, selecione apenas para completar a ação de copiar.</p>
-
-      <div class="brp-checklist-grid">
-        <div class="brp-checklist-item">
-          <input type="checkbox" id="c1" />
-          <label for="c1">LEI DE MIRANDA: ANTES DE CHEGAR NA DELEGACIA</label>
-        </div>
-        <div class="brp-checklist-item">
-          <input type="checkbox" id="c2" />
-          <label for="c2">REVISTA DE SEXO OPOSTO: FEITO COM MÉTODO DE CAIXA</label>
-        </div>
-        <div class="brp-checklist-item">
-          <input type="checkbox" id="c3" />
-          <label for="c3">FOTO DO INVENTÁRIO (PRINT DE TELA INTEIRA)</label>
-        </div>
-        <div class="brp-checklist-item">
-          <input type="checkbox" id="c4" />
-          <label for="c4">FOTO DO INVENTÁRIO DO VEÍCULO (PRINT DE TELA INTEIRA)</label>
-        </div>
-        <div class="brp-checklist-item">
-          <input type="checkbox" id="c5" />
-          <label for="c5">FOTO DO ROSTO COM RG ABERTO (PRINT DE TELA INTEIRA)</label>
-        </div>
-        <div class="brp-checklist-item">
-          <input type="checkbox" id="c6" />
-          <label for="c6">FOTO DO CORPO COM RG ABERTO (PRINT DE TELA INTEIRA)</label>
-        </div>
-        <div class="brp-checklist-item">
-          <input type="checkbox" id="c7" />
-          <label for="c7">CRIME DE OCULTAÇÃO FACIAL: FOTO COM E SEM MÁSCARA</label>
-        </div>
-        <div class="brp-checklist-item">
-          <input type="checkbox" id="c8" />
-          <label for="c8">VERIFICADO SE HÁ USO DE COLDRE OU COLETE (ROUPA) VISÍVEL</label>
-        </div>
-        <div class="brp-checklist-item">
-          <input type="checkbox" id="c9" />
-          <label for="c9">FOTO DA CALCULADORA (PRINT DE TELA INTEIRA)</label>
-        </div>
-        <div class="brp-checklist-item">
-          <input type="checkbox" id="c10" />
-          <label for="c10">RELATÓRIO DA AÇÃO COM QUANTITATIVO DE ITENS DO INVENTÁRIO</label>
-        </div>
-        <div class="brp-checklist-item">
-          <input type="checkbox" id="c11" />
-          <label for="c11">MARCAR TODOS OS ENVOLVIDOS: POLICIAIS E JURÍDICO</label>
-        </div>
-      </div>
-
+      <button class="brp-modal-close" id="closeAntecedentes">&times;</button>
+      <h2>🔍 BUSCAR ANTECEDENTES CRIMINAIS</h2>
+      
       <div class="brp-modal-inputs">
-        <label>Jurídico Envolvido: <input type="text" id="juridico" placeholder="Nome do jurídico..." /></label>
-        <label>Relatório da Ação: <textarea id="relatorio" placeholder="Descreva a ação..."></textarea></label>
+        <label>
+          ID do Acusado (Passaporte):
+          <input type="text" id="busca_antecedentes_id" placeholder="Digite o ID exato do preso..." />
+        </label>
+        <button class="brp-btn-modal" id="btnBuscarAntecedentes">BUSCAR</button>
       </div>
 
-      <button class="brp-btn-modal" id="copiarComChecklist">COPIAR PENA</button>
+      <div id="resultadoAntecedentes" class="brp-resultado"></div>
     </div>
   </div>
+
+  <!-- MODAL BUSCAR FICHA -->
+  <div id="fichaModal" class="brp-modal">
+    <div class="brp-modal-content">
+      <button class="brp-modal-close" id="closeFicha">&times;</button>
+      <h2>🔍 BUSCAR FICHA CRIMINAL</h2>
+      
+      <div class="brp-modal-inputs">
+        <label>
+          ID da Ficha:
+          <input type="text" id="busca_ficha_id" placeholder="Digite o ID exato da ficha..." />
+        </label>
+        <button class="brp-btn-modal" id="btnBuscarFicha">BUSCAR</button>
+      </div>
+
+      <div id="resultadoFicha" class="brp-resultado"></div>
+    </div>
+  </div>
+
+  <!-- MODAL BUSCAR POLICIAL -->
+  <div id="policialModal" class="brp-modal">
+    <div class="brp-modal-content">
+      <button class="brp-modal-close" id="closePolicial">&times;</button>
+      <h2>🔍 BUSCAR ESTATÍSTICAS DE POLICIAL</h2>
+      
+      <div class="brp-modal-inputs">
+        <label>
+          ID do Policial:
+          <input type="text" id="busca_policial_id" placeholder="Digite o ID exato do policial..." />
+        </label>
+        <button class="brp-btn-modal" id="btnBuscarPolicial">BUSCAR</button>
+      </div>
+
+      <div id="resultadoPolicial" class="brp-resultado"></div>
+    </div>
+  </div>
+
+  <!-- MODAL REGISTRAR PRISÃO -->
+<div id="registroModal" class="brp-modal">
+  <div class="brp-modal-content">
+    <button class="brp-modal-close" onclick="document.getElementById('registroModal').style.display='none'">&times;</button>
+    <h2>📝 REGISTRAR PRISÃO</h2>
+    
+    <div class="brp-modal-inputs">
+      <label>ID de quem prendeu:
+        <input type="text" id="prisao_por_id" placeholder="Ex: 1234" required />
+      </label>
+      <label>Nome de quem prendeu:
+        <input type="text" id="prisao_por_nome" placeholder="Ex: João Silva" required />
+      </label>
+      <label>IDs dos policiais envolvidos (separados por vírgula):
+        <input type="text" id="policiais_ids" placeholder="Ex: 1234, 5678" />
+      </label>
+      <label>Nomes dos policiais envolvidos (separados por vírgula):
+        <input type="text" id="policiais_nomes" placeholder="Ex: João Silva, Maria Santos" />
+      </label>
+      <label>Nome do jurídico (se houver):
+        <input type="text" id="juridico_nome" placeholder="Ex: Dr. Carlos" />
+      </label>
+      <label>Relatório da ação:
+        <textarea id="relatorio_acao" rows="5" placeholder="Descreva o que aconteceu..." required></textarea>
+      </label>
+
+      <h3>📸 ANEXAR IMAGENS</h3>
+      
+      <div class="brp-paste-area" data-target="foto_inventario">
+        <label>Inventário:</label>
+        <input type="file" id="foto_inventario" accept="image/*" style="display: none;" />
+        <div class="brp-paste-preview">
+          <span>Clique para selecionar ou cole a imagem aqui (Ctrl+V)</span>
+        </div>
+      </div>
+
+      <div class="brp-paste-area" data-target="foto_mdt">
+        <label>MDT:</label>
+        <input type="file" id="foto_mdt" accept="image/*" style="display: none;" />
+        <div class="brp-paste-preview">
+          <span>Clique para selecionar ou cole a imagem aqui (Ctrl+V)</span>
+        </div>
+      </div>
+
+      <div class="brp-paste-area" data-target="foto_oab">
+        <label>OAB (se houver):</label>
+        <input type="file" id="foto_oab" accept="image/*" style="display: none;" />
+        <div class="brp-paste-preview">
+          <span>Clique para selecionar ou cole a imagem aqui (Ctrl+V)</span>
+        </div>
+      </div>
+
+      <div class="brp-paste-area" data-target="foto_rg_mask">
+        <label>RG com Máscara:</label>
+        <input type="file" id="foto_rg_mask" accept="image/*" style="display: none;" />
+        <div class="brp-paste-preview">
+          <span>Clique para selecionar ou cole a imagem aqui (Ctrl+V)</span>
+        </div>
+      </div>
+
+      <div class="brp-paste-area" data-target="foto_rg">
+        <label>RG sem Máscara:</label>
+        <input type="file" id="foto_rg" accept="image/*" style="display: none;" />
+        <div class="brp-paste-preview">
+          <span>Clique para selecionar ou cole a imagem aqui (Ctrl+V)</span>
+        </div>
+      </div>
+
+      <button class="brp-btn-modal" id="enviarRegistro">ENVIAR PRISÃO</button>
+    </div>
+  </div>
+</div>
 
   <script src="data.js"></script>
   <script src="app.js"></script>
