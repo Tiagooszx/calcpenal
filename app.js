@@ -407,7 +407,7 @@ function inicializar() {
         if (fotoRgEl?.files[0]) formData.append('foto_rg', fotoRgEl.files[0]);
 
         // Enviar para o servidor
-        const response = await fetch('api/registrar.php', {
+        const response = await fetch('/calcpenal/api/registrar.php', {  // Caminho absoluto
           method: 'POST',
           body: formData
         });
