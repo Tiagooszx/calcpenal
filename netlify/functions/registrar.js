@@ -62,19 +62,21 @@ exports.handler = async (event) => {
     const {
       nome, passaporte, crimes, artigos, reducao, atenuantes,
       pena, multa, fianca_paga, fianca, prisao_por_id, prisao_por,
-      policiais_ids, policiais, juridico, relatorio
+      policiais_ids, policiais, juridico, relatorio,
+      foto_inv, foto_mdt, foto_oab, foto_rg_mask, foto_rg
     } = fields;
 
-    // Inserir ficha (SEM IMAGENS)
+    // Inserir ficha COM URLS DAS IMAGENS
     const [result] = await db.execute(
       `INSERT INTO fichas (
         nome, passaporte, crimes, artigos, reducao, atenuantes, pena, multa, 
         fianca_paga, fianca, prisao_por_id, prisao_por, policiais_ids, policiais, 
-        juridico, relatorio, data
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+        juridico, relatorio, foto_inv, foto_mdt, foto_oab, foto_rg_mask, foto_rg, data
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
       [nome, passaporte, crimes, artigos, reducao, atenuantes, pena, multa,
        fianca_paga, fianca, prisao_por_id, prisao_por, policiais_ids, policiais,
-       juridico, relatorio]
+       juridico, relatorio, foto_inv || null, foto_mdt || null, foto_oab || null, 
+       foto_rg_mask || null, foto_rg || null]
     );
 
     const id = result.insertId;
