@@ -301,28 +301,22 @@ function inicializar() {
         const penaReduzida = penaReduzidaEl.textContent || '0';
         const multa = multaEl.textContent || '0,00';
         
-        // CORREÇÃO: Verificar texto completo de fiança paga
         const fiancaPagaTexto = fiancaPagaEl.textContent;
         const fiancaPaga = fiancaPagaTexto.includes('Sim') ? 'Sim' : 'Não';
         
-        // CORREÇÃO COMPLETA: Buscar valor da fiança de forma segura
         let fiancaCompleta = '0,00';
         
-        // Tentar pegar do span f-fianca (quando não é crime inafiançável)
         const fiancaEl = document.getElementById('f-fianca');
         if (fiancaEl && fiancaEl.textContent) {
           fiancaCompleta = fiancaEl.textContent;
         } else {
-          // Se não existir, verificar se é crime inafiançável
           const fiancaContainer = document.getElementById('f-fianca-container');
           if (fiancaContainer) {
             const textoContainer = fiancaContainer.textContent;
             
-            // Se for crime inafiançável, deixar 0,00
             if (textoContainer.includes('inafiançável')) {
               fiancaCompleta = '0,00';
             } else {
-              // Tentar extrair valor do card de fiança
               const valorFiancaCard = document.getElementById('valorFianca');
               if (valorFiancaCard) {
                 fiancaCompleta = valorFiancaCard.textContent || '0,00';
@@ -374,42 +368,30 @@ function inicializar() {
           policiaisFormatado = policiaisArray.join(', ');
         }
 
-        const formData = new FormData();
+        // ENVIAR DADOS SEM IMAGENS PARA O BACKEND
+        const formDataBackend = new FormData();
         
-        formData.append('nome', nome);
-        formData.append('passaporte', passaporte);
-        formData.append('crimes', crimesLista);
-        formData.append('artigos', artigosNumeros);
-        formData.append('reducao', reducao);
-        formData.append('atenuantes', atenuantesLista);
-        formData.append('pena', penaReduzida + ' meses');
-        formData.append('multa', 'R$ ' + multa);
-        formData.append('fianca_paga', fiancaPaga);
-        formData.append('fianca', 'R$ ' + fiancaCompleta);
-        formData.append('prisao_por_id', prisaoPorId);
-        formData.append('prisao_por', prisaoPorFormatado);
-        formData.append('policiais_ids', policiaisIds);
-        formData.append('policiais', policiaisFormatado);
-        formData.append('juridico', juridicoNomeEl ? juridicoNomeEl.value : '');
-        formData.append('relatorio', relatorio);
+        formDataBackend.append('nome', nome);
+        formDataBackend.append('passaporte', passaporte);
+        formDataBackend.append('crimes', crimesLista);
+        formDataBackend.append('artigos', artigosNumeros);
+        formDataBackend.append('reducao', reducao);
+        formDataBackend.append('atenuantes', atenuantesLista);
+        formDataBackend.append('pena', penaReduzida + ' meses');
+        formDataBackend.append('multa', 'R$ ' + multa);
+        formDataBackend.append('fianca_paga', fiancaPaga);
+        formDataBackend.append('fianca', 'R$ ' + fiancaCompleta);
+        formDataBackend.append('prisao_por_id', prisaoPorId);
+        formDataBackend.append('prisao_por', prisaoPorFormatado);
+        formDataBackend.append('policiais_ids', policiaisIds);
+        formDataBackend.append('policiais', policiaisFormatado);
+        formDataBackend.append('juridico', juridicoNomeEl ? juridicoNomeEl.value : '');
+        formDataBackend.append('relatorio', relatorio);
 
-        // Anexar imagens
-        const fotoInvEl = document.getElementById('foto_inventario');
-        const fotoMdtEl = document.getElementById('foto_mdt');
-        const fotoOabEl = document.getElementById('foto_oab');
-        const fotoRgMaskEl = document.getElementById('foto_rg_mask');
-        const fotoRgEl = document.getElementById('foto_rg');
-
-        if (fotoInvEl?.files[0]) formData.append('foto_inventario', fotoInvEl.files[0]);
-        if (fotoMdtEl?.files[0]) formData.append('foto_mdt', fotoMdtEl.files[0]);
-        if (fotoOabEl?.files[0]) formData.append('foto_oab', fotoOabEl.files[0]);
-        if (fotoRgMaskEl?.files[0]) formData.append('foto_rg_mask', fotoRgMaskEl.files[0]);
-        if (fotoRgEl?.files[0]) formData.append('foto_rg', fotoRgEl.files[0]);
-
-        // Enviar para o servidor
+        // Registrar no banco SEM imagens
         const response = await fetch('/.netlify/functions/registrar', {
           method: 'POST',
-          body: formData
+          body: formDataBackend
         });
 
         if (!response.ok) {
@@ -419,7 +401,55 @@ function inicializar() {
         const data = await response.json();
 
         if (data.success) {
-          alert('✅ Prisão registrada com sucesso!\n📊 ID da Ficha: ' + data.id);
+          const fichaId = data.id;
+
+          // AGORA ENVIAR PARA DISCORD COM IMAGENS (direto do frontend)
+          const webhookUrl = 'https://discord.com/api/webhooks/1445105953304350832/u-Ewg7eskl3Wm2kvZk7by1qXd-nbSNmEPNjUFOlWy_CyOo6c_Wy1gxSC3P7zriPQq6EY';
+
+          const mensagem = `# 𝗙𝗜𝗖𝗛𝗔 𝗖𝗥𝗜𝗠𝗜𝗡𝗔𝗟\n\n` +
+            `𝗡𝗢𝗠𝗘 𝗗𝗢 𝗔𝗖𝗨𝗦𝗔𝗗𝗢: ${nome}\n` +
+            `𝗣𝗔𝗦𝗦𝗔𝗣𝗢𝗥𝗧𝗘 𝗗𝗢 𝗔𝗖𝗨𝗦𝗔𝗗𝗢: ${passaporte}\n\n` +
+            `𝗖𝗥𝗜𝗠𝗘𝗦 𝗖𝗢𝗠𝗘𝗧𝗜𝗗𝗢𝗦:\n${crimesLista}\n` +
+            `𝗥𝗘𝗗𝗨𝗖̧𝗔̃𝗢 𝗔𝗣𝗟𝗜𝗖𝗔𝗗𝗔: ${reducao}\n` +
+            `𝗔𝗧𝗘𝗡𝗨𝗔𝗡𝗧𝗘𝗦: ${atenuantesLista}\n` +
+            `𝗧𝗢𝗧𝗔𝗟 𝗗𝗔 𝗣𝗘𝗡𝗔: ${penaReduzida} meses\n\n` +
+            `𝗧𝗢𝗧𝗔𝗟 𝗗𝗘 𝗠𝗨𝗟𝗧𝗔: R$ ${multa}\n` +
+            `𝗙𝗜𝗔𝗡𝗖̧𝗔 𝗣𝗔𝗚𝗔: ${fiancaPaga}\n` +
+            `𝗧𝗢𝗧𝗔𝗟 𝗗𝗘 𝗙𝗜𝗔𝗡𝗖̧𝗔: R$ ${fiancaCompleta}\n\n` +
+            `𝗣𝗥𝗜𝗦𝗔̃𝗢 𝗙𝗘𝗜𝗧𝗔 𝗣𝗢𝗥: ${prisaoPorFormatado}\n` +
+            `𝗣𝗢𝗟𝗜𝗖𝗜𝗔𝗜𝗦 𝗘𝗡𝗩𝗢𝗟𝗩𝗜𝗗𝗢𝗦: ${policiaisFormatado || '-'}\n` +
+            `𝗝𝗨𝗥𝗜́𝗗𝗜𝗖𝗢 𝗘𝗡𝗩𝗢𝗟𝗩𝗜𝗗𝗢: ${juridicoNomeEl?.value || 'não veio'}\n\n` +
+            `𝗥𝗘𝗟𝗔𝗧𝗢́𝗥𝗜𝗢 𝗗𝗔 𝗔𝗖̧𝗔̃𝗢:\n${relatorio}\n\n` +
+            `**ID:** ${fichaId} | ${new Date().toLocaleString('pt-BR')}`;
+
+          const formDataDiscord = new FormData();
+          formDataDiscord.append('content', mensagem);
+
+          // Adicionar imagens
+          const fotoInvEl = document.getElementById('foto_inventario');
+          const fotoMdtEl = document.getElementById('foto_mdt');
+          const fotoOabEl = document.getElementById('foto_oab');
+          const fotoRgMaskEl = document.getElementById('foto_rg_mask');
+          const fotoRgEl = document.getElementById('foto_rg');
+
+          let totalImagens = 0;
+          if (fotoInvEl?.files[0]) { formDataDiscord.append('file0', fotoInvEl.files[0]); totalImagens++; }
+          if (fotoMdtEl?.files[0]) { formDataDiscord.append('file1', fotoMdtEl.files[0]); totalImagens++; }
+          if (fotoOabEl?.files[0]) { formDataDiscord.append('file2', fotoOabEl.files[0]); totalImagens++; }
+          if (fotoRgMaskEl?.files[0]) { formDataDiscord.append('file3', fotoRgMaskEl.files[0]); totalImagens++; }
+          if (fotoRgEl?.files[0]) { formDataDiscord.append('file4', fotoRgEl.files[0]); totalImagens++; }
+
+          // Enviar para Discord
+          try {
+            await fetch(webhookUrl, {
+              method: 'POST',
+              body: formDataDiscord
+            });
+            alert(`✅ Prisão registrada com sucesso!\n📊 ID da Ficha: ${fichaId}\n📸 ${totalImagens} imagens enviadas para Discord!`);
+          } catch (discordError) {
+            console.error('Erro ao enviar para Discord:', discordError);
+            alert(`✅ Prisão registrada com sucesso!\n📊 ID da Ficha: ${fichaId}\n⚠️ Erro ao enviar imagens para Discord`);
+          }
           
           const modalEl = document.getElementById('registroModal');
           if (modalEl) modalEl.style.display = 'none';
