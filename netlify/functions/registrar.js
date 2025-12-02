@@ -35,9 +35,15 @@ exports.handler = async (event) => {
       };
     }
 
-    // Processar FormData com busboy
+    // Processar FormData com busboy (com limite de tamanho menor)
     await new Promise((resolve, reject) => {
-      const bb = busboy({ headers: { 'content-type': contentType } });
+      const bb = busboy({ 
+        headers: { 'content-type': contentType },
+        limits: {
+          fileSize: 5 * 1024 * 1024, // 5MB por arquivo
+          files: 5 // máximo 5 arquivos
+        }
+      });
 
       bb.on('field', (name, value) => {
         fields[name] = value;
@@ -45,13 +51,24 @@ exports.handler = async (event) => {
 
       bb.on('file', (name, file, info) => {
         const chunks = [];
-        file.on('data', (data) => chunks.push(data));
+        let size = 0;
+        
+        file.on('data', (data) => {
+          size += data.length;
+          // Limitar a 5MB
+          if (size <= 5 * 1024 * 1024) {
+            chunks.push(data);
+          }
+        });
+        
         file.on('end', () => {
-          files[name] = {
-            buffer: Buffer.concat(chunks),
-            filename: info.filename,
-            mimeType: info.mimeType
-          };
+          if (chunks.length > 0) {
+            files[name] = {
+              buffer: Buffer.concat(chunks),
+              filename: info.filename,
+              mimeType: info.mimeType
+            };
+          }
         });
       });
 
@@ -144,7 +161,7 @@ exports.handler = async (event) => {
 
     await db.end();
 
-    // ========== ENVIAR PARA DISCORD =========
+    // ========== ENVIAR PARA DISCORD (OTIMIZADO) ==========
     const webhookUrl = 'https://discord.com/api/webhooks/1445105953304350832/u-Ewg7eskl3Wm2kvZk7by1qXd-nbSNmEPNjUFOlWy_CyOo6c_Wy1gxSC3P7zriPQq6EY';
 
     // Formatar mensagem
@@ -164,42 +181,44 @@ exports.handler = async (event) => {
       `𝗥𝗘𝗟𝗔𝗧𝗢́𝗥𝗜𝗢 𝗗𝗔 𝗔𝗖̧𝗔̃𝗢:\n${relatorio || '-'}\n\n` +
       `**ID:** ${id} | ${new Date().toLocaleString('pt-BR')}`;
 
-    // Criar boundary para multipart
-    const boundary = `----WebKitFormBoundary${Math.random().toString(36).substring(2)}`;
-    const eol = '\r\n';
+    // Enviar para Discord usando fetch (mais simples e eficiente)
+    const FormData = require('form-data');
+    const form = new FormData();
     
-    let postData = '';
+    form.append('content', mensagem);
     
-    // Adicionar mensagem
-    postData += `--${boundary}${eol}`;
-    postData += `Content-Disposition: form-data; name="content"${eol}${eol}`;
-    postData += `${mensagem}${eol}`;
-    
-    // Adicionar arquivos
+    // Adicionar arquivos (limitado aos primeiros 10MB total)
     let fileIndex = 0;
+    let totalSize = 0;
+    const maxTotalSize = 10 * 1024 * 1024; // 10MB total
+    
     for (const [key, fileData] of Object.entries(files)) {
       if (fileData && fileData.buffer) {
-        postData += `--${boundary}${eol}`;
-        postData += `Content-Disposition: form-data; name="file${fileIndex}"; filename="${fileData.filename}"${eol}`;
-        postData += `Content-Type: ${fileData.mimeType}${eol}${eol}`;
-        postData += fileData.buffer.toString('binary') + eol;
-        fileIndex++;
+        const fileSize = fileData.buffer.length;
+        
+        // Verificar se adicionar este arquivo ultrapassaria o limite
+        if (totalSize + fileSize <= maxTotalSize) {
+          form.append(`file${fileIndex}`, fileData.buffer, {
+            filename: fileData.filename,
+            contentType: fileData.mimeType
+          });
+          totalSize += fileSize;
+          fileIndex++;
+        } else {
+          console.warn(`Arquivo ${fileData.filename} ignorado (limite de tamanho)`);
+        }
       }
     }
-    
-    postData += `--${boundary}--${eol}`;
 
-    // Enviar para Discord usando https
+    // Enviar para Discord
     await new Promise((resolve, reject) => {
       const url = new URL(webhookUrl);
+      
       const options = {
         hostname: url.hostname,
-        path: url.pathname + url.search,
+        path: url.pathname,
         method: 'POST',
-        headers: {
-          'Content-Type': `multipart/form-data; boundary=${boundary}`,
-          'Content-Length': Buffer.byteLength(postData, 'binary')
-        }
+        headers: form.getHeaders()
       };
 
       const req = https.request(options, (res) => {
@@ -207,21 +226,21 @@ exports.handler = async (event) => {
         res.on('data', chunk => data += chunk);
         res.on('end', () => {
           if (res.statusCode >= 200 && res.statusCode < 300) {
+            console.log('Discord: Mensagem enviada com sucesso!');
             resolve();
           } else {
             console.error('Discord error:', res.statusCode, data);
-            resolve(); // Não rejeitar para não bloquear o registro
+            resolve(); // Não rejeitar para não bloquear
           }
         });
       });
 
       req.on('error', (error) => {
         console.error('Discord webhook error:', error);
-        resolve(); // Não rejeitar para não bloquear o registro
+        resolve(); // Não rejeitar para não bloquear
       });
 
-      req.write(postData, 'binary');
-      req.end();
+      form.pipe(req);
     });
 
     return {
