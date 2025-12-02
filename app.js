@@ -794,7 +794,7 @@ function inicializar() {
     resultado.innerHTML = '<div style="text-align: center; color: var(--brp-accent);">🔍 Buscando...</div>';
 
     try {
-      const response = await fetch(`/netlify/functions/buscar?tipo=policial&id=${encodeURIComponent(id)}`);
+      const response = await fetch(`/.netlify/functions/buscar?tipo=policial&id=${encodeURIComponent(id)}`);
       const data = await response.json();
 
       if (data.success) {

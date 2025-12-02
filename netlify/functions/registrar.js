@@ -1,4 +1,5 @@
 const mysql = require('mysql2/promise');
+const busboy = require('busboy');
 
 exports.handler = async (event) => {
   const headers = {
@@ -20,22 +21,51 @@ exports.handler = async (event) => {
   }
 
   try {
-    // Parse do body (vem como base64 do FormData)
-    const body = JSON.parse(event.body);
+    // Parse FormData
+    const fields = {};
+    const contentType = event.headers['content-type'] || event.headers['Content-Type'];
+    
+    if (!contentType || !contentType.includes('multipart/form-data')) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ success: false, error: 'Content-Type deve ser multipart/form-data' })
+      };
+    }
+
+    // Processar FormData com busboy
+    await new Promise((resolve, reject) => {
+      const bb = busboy({ headers: { 'content-type': contentType } });
+
+      bb.on('field', (name, value) => {
+        fields[name] = value;
+      });
+
+      bb.on('file', (name, file, info) => {
+        // Ignorar arquivos por enquanto (Netlify Functions tem limite de tamanho)
+        file.resume();
+      });
+
+      bb.on('finish', resolve);
+      bb.on('error', reject);
+
+      bb.write(Buffer.from(event.body, event.isBase64Encoded ? 'base64' : 'utf8'));
+      bb.end();
+    });
 
     const db = await mysql.createConnection({
-      host: 'yamabiko.proxy.rlwy.net',
-      port: 22038,
-      user: 'root',
-      password: 'RjCcrYAtYaUDvDJuqbFbNHWMpFDAXewM',
-      database: 'railway'
+      host: process.env.MYSQL_HOST || 'yamabiko.proxy.rlwy.net',
+      port: process.env.MYSQL_PORT || 22038,
+      user: process.env.MYSQL_USER || 'root',
+      password: process.env.MYSQL_PASSWORD || 'RjCcrYAtYaUDvDJuqbFbNHWMpFDAXewM',
+      database: process.env.MYSQL_DATABASE || 'railway'
     });
 
     const {
       nome, passaporte, crimes, artigos, reducao, atenuantes,
       pena, multa, fianca_paga, fianca, prisao_por_id, prisao_por,
       policiais_ids, policiais, juridico, relatorio
-    } = body;
+    } = fields;
 
     // Inserir ficha
     const [result] = await db.execute(
@@ -84,15 +114,35 @@ exports.handler = async (event) => {
       );
     }
 
+    // Atualizar policiais envolvidos
+    if (policiais_ids && policiais) {
+      const ids = policiais_ids.split(',').map(id => id.trim()).filter(Boolean);
+      const nomes = policiais.split('|').map(n => n.split('|')[0].trim()).filter(Boolean);
+
+      for (let i = 0; i < ids.length; i++) {
+        if (ids[i] && nomes[i]) {
+          await db.execute(
+            `INSERT INTO policiais (id, nome, total_prisoes, ultima)
+             VALUES (?, ?, 1, NOW())
+             ON DUPLICATE KEY UPDATE 
+               total_prisoes = total_prisoes + 1,
+               ultima = NOW()`,
+            [ids[i], nomes[i]]
+          );
+        }
+      }
+    }
+
     await db.end();
 
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ success: true, id, message: 'Prisão registrada!' })
+      body: JSON.stringify({ success: true, id, message: 'Prisão registrada com sucesso!' })
     };
 
   } catch (error) {
+    console.error('Erro no registrar:', error);
     return {
       statusCode: 500,
       headers,
