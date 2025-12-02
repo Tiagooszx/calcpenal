@@ -368,6 +368,8 @@ function inicializar() {
           policiaisFormatado = policiaisArray.join(', ');
         }
 
+        console.log('📤 Enviando para backend...');
+
         // ENVIAR DADOS SEM IMAGENS PARA O BACKEND
         const formDataBackend = new FormData();
         
@@ -394,16 +396,22 @@ function inicializar() {
           body: formDataBackend
         });
 
+        console.log('📥 Resposta do backend:', response.status);
+
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          const errorText = await response.text();
+          throw new Error(`HTTP ${response.status}: ${errorText}`);
         }
 
         const data = await response.json();
+        console.log('✅ Dados salvos no banco:', data);
 
         if (data.success) {
           const fichaId = data.id;
 
-          // AGORA ENVIAR PARA DISCORD COM IMAGENS (direto do frontend)
+          console.log('📸 Preparando envio para Discord...');
+
+          // ENVIAR PARA DISCORD COM IMAGENS
           const webhookUrl = 'https://discord.com/api/webhooks/1445105953304350832/u-Ewg7eskl3Wm2kvZk7by1qXd-nbSNmEPNjUFOlWy_CyOo6c_Wy1gxSC3P7zriPQq6EY';
 
           const mensagem = `# 𝗙𝗜𝗖𝗛𝗔 𝗖𝗥𝗜𝗠𝗜𝗡𝗔𝗟\n\n` +
@@ -433,24 +441,57 @@ function inicializar() {
           const fotoRgEl = document.getElementById('foto_rg');
 
           let totalImagens = 0;
-          if (fotoInvEl?.files[0]) { formDataDiscord.append('file0', fotoInvEl.files[0]); totalImagens++; }
-          if (fotoMdtEl?.files[0]) { formDataDiscord.append('file1', fotoMdtEl.files[0]); totalImagens++; }
-          if (fotoOabEl?.files[0]) { formDataDiscord.append('file2', fotoOabEl.files[0]); totalImagens++; }
-          if (fotoRgMaskEl?.files[0]) { formDataDiscord.append('file3', fotoRgMaskEl.files[0]); totalImagens++; }
-          if (fotoRgEl?.files[0]) { formDataDiscord.append('file4', fotoRgEl.files[0]); totalImagens++; }
+          if (fotoInvEl?.files[0]) { 
+            formDataDiscord.append('file0', fotoInvEl.files[0]); 
+            totalImagens++; 
+            console.log('📎 Foto inventário adicionada');
+          }
+          if (fotoMdtEl?.files[0]) { 
+            formDataDiscord.append('file1', fotoMdtEl.files[0]); 
+            totalImagens++; 
+            console.log('📎 Foto MDT adicionada');
+          }
+          if (fotoOabEl?.files[0]) { 
+            formDataDiscord.append('file2', fotoOabEl.files[0]); 
+            totalImagens++; 
+            console.log('📎 Foto OAB adicionada');
+          }
+          if (fotoRgMaskEl?.files[0]) { 
+            formDataDiscord.append('file3', fotoRgMaskEl.files[0]); 
+            totalImagens++; 
+            console.log('📎 Foto RG com máscara adicionada');
+          }
+          if (fotoRgEl?.files[0]) { 
+            formDataDiscord.append('file4', fotoRgEl.files[0]); 
+            totalImagens++; 
+            console.log('📎 Foto RG sem máscara adicionada');
+          }
+
+          console.log(`📤 Enviando para Discord (${totalImagens} imagens)...`);
 
           // Enviar para Discord
           try {
-            await fetch(webhookUrl, {
+            const discordResponse = await fetch(webhookUrl, {
               method: 'POST',
               body: formDataDiscord
             });
-            alert(`✅ Prisão registrada com sucesso!\n📊 ID da Ficha: ${fichaId}\n📸 ${totalImagens} imagens enviadas para Discord!`);
+
+            console.log('📥 Resposta do Discord:', discordResponse.status);
+
+            if (discordResponse.ok) {
+              console.log('✅ Enviado para Discord com sucesso!');
+              alert(`✅ Prisão registrada com sucesso!\n📊 ID da Ficha: ${fichaId}\n📸 ${totalImagens} imagens enviadas para Discord!`);
+            } else {
+              const discordError = await discordResponse.text();
+              console.error('❌ Erro Discord:', discordError);
+              alert(`✅ Prisão registrada com sucesso!\n📊 ID da Ficha: ${fichaId}\n⚠️ Erro ao enviar para Discord: ${discordResponse.status}`);
+            }
           } catch (discordError) {
-            console.error('Erro ao enviar para Discord:', discordError);
-            alert(`✅ Prisão registrada com sucesso!\n📊 ID da Ficha: ${fichaId}\n⚠️ Erro ao enviar imagens para Discord`);
+            console.error('❌ Erro ao enviar para Discord:', discordError);
+            alert(`✅ Prisão registrada com sucesso!\n📊 ID da Ficha: ${fichaId}\n⚠️ Erro ao enviar imagens para Discord: ${discordError.message}`);
           }
           
+          // Fechar modal
           const modalEl = document.getElementById('registroModal');
           if (modalEl) modalEl.style.display = 'none';
           
@@ -473,10 +514,10 @@ function inicializar() {
             if (input) input.value = '';
           });
         } else {
-          alert('❌ Erro ao registrar prisão: ' + data.error);
+          alert('❌ Erro ao registrar prisão: ' + (data.error || 'Erro desconhecido'));
         }
       } catch (error) {
-        console.error('Erro completo:', error);
+        console.error('❌ Erro completo:', error);
         alert('❌ Erro ao enviar dados: ' + error.message);
       }
     });
