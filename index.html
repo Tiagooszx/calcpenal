@@ -45,6 +45,7 @@
         </div>
       </div>
     </div>
+
     <div class="brp-main">
       <div class="brp-list-panel">
         <div class="brp-list-title">ARTIGOS</div>
@@ -54,6 +55,7 @@
         </div>
         <div id="articles" class="brp-articles-list"></div>
       </div>
+
       <div class="brp-attenuantes-panel">
         <div class="brp-attenuantes-title">ATENUANTES</div>
         <div class="brp-attenuantes-list" id="attenuantes">
@@ -65,40 +67,38 @@
           <div class="brp-att-item" data-id="Delação Premiada" data-reduc="50" title="AUTORIZADA APENAS EM PRISÕES EFETUADAS PELOS DELEGADOS INVESTIGATIVOS E/OU AUTORIZADOS DA DIVISÃO DE INVESTIGAÇÃO.">Delação Premiada</div>
         </div>
       </div>
-<div class="brp-summary-panel">
-  <div class="brp-ficha-title">FICHA CRIMINAL</div>
 
-  <div class="brp-ficha-line"><strong>NOME DO ACUSADO:</strong> <span id="f-nome"></span></div>
-  <div class="brp-ficha-line"><strong>PASSAPORTE DO ACUSADO:</strong> <span id="f-id"></span></div>
+      <div class="brp-summary-panel">
+        <div class="brp-ficha-title">FICHA CRIMINAL</div>
+        <div class="brp-ficha-line"><strong>NOME DO ACUSADO:</strong> <span id="f-nome"></span></div>
+        <div class="brp-ficha-line"><strong>PASSAPORTE DO ACUSADO:</strong> <span id="f-id"></span></div>
+        <div class="brp-ficha-line"><strong>CRIMES COMETIDOS:</strong></div>
+        <ul id="f-crimes" class="brp-ficha-list"></ul>
+        <div class="brp-ficha-line"><strong>TOTAL DA PENA:</strong> <span id="f-total">0</span> meses</div>
+        <div class="brp-ficha-line"><strong>ATENUANTES:</strong> <span id="f-atten">Nenhum</span></div>
+        <div class="brp-ficha-line"><strong>REDUÇÃO APLICADA:</strong> <span id="f-reduc">0%</span></div>
+        <div class="brp-ficha-line"><strong>TOTAL DA PENA REDUZIDA:</strong> <span id="f-total-red">0</span> meses</div>
+        <div class="brp-ficha-line"><strong>TOTAL DE MULTA:</strong> R$ <span id="f-multa">0,00</span></div>
+        <div class="brp-ficha-line"><strong>FIANÇA PAGA:</strong> <span id="f-fianca-paid">Não</span></div>
+        <div class="brp-ficha-line"><strong>VALOR TOTAL DA FIANÇA:</strong> <span id="f-fianca-container">R$ <span id="f-fianca">0,00</span></span></div>
 
-  <div class="brp-ficha-line"><strong>CRIMES COMETIDOS:</strong></div>
-  <ul id="f-crimes" class="brp-ficha-list"></ul>
+        <div class="brp-buttons">
+          <button class="brp-btn" id="calc">Calcular Pena</button>
+          <button class="brp-btn" id="registrar">Registrar Prisão</button>
+          <button class="brp-btn" id="limpar">Limpar Tudo</button>
+          <button class="brp-btn" id="buscarAntecedentes">Buscar Antecedentes</button>
+          <button class="brp-btn" id="buscarFicha">Buscar Ficha</button>
+          <button class="brp-btn" id="buscarPolicial">Buscar Policial</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <div class="brp-ficha-line"><strong>TOTAL DA PENA:</strong> <span id="f-total">0</span> meses</div>
-  <div class="brp-ficha-line"><strong>ATENUANTES:</strong> <span id="f-atten">Nenhum</span></div>
-  <div class="brp-ficha-line"><strong>REDUÇÃO APLICADA:</strong> <span id="f-reduc">0%</span></div>
-  <div class="brp-ficha-line"><strong>TOTAL DA PENA REDUZIDA:</strong> <span id="f-total-red">0</span> meses</div>
-  <div class="brp-ficha-line"><strong>TOTAL DE MULTA:</strong> R$ <span id="f-multa">0,00</span></div>
-  <div class="brp-ficha-line"><strong>FIANÇA PAGA:</strong> <span id="f-fianca-paid">Não</span></div>
-  <div class="brp-ficha-line"><strong>VALOR TOTAL DA FIANÇA:</strong> <span id="f-fianca-container">R$ <span id="f-fianca">0,00</span></span></div>
-
-  <div class="brp-buttons">
-    <button class="brp-btn" id="calc">Calcular Pena</button>
-    <button class="brp-btn" id="registrar">Registrar Prisão</button>
-    <button class="brp-btn" id="limpar">Limpar Tudo</button>
-    <button class="brp-btn" id="buscarAntecedentes">Buscar Antecedentes</button>
-    <button class="brp-btn" id="buscarFicha">Buscar Ficha</button>
-    <button class="brp-btn" id="buscarPolicial">Buscar Policial</button>
-  </div> 
-</div>
-
-
-  <!-- MODAL BUSCAR ANTECEDENTES -->
+  <!-- MODAIS -->
   <div id="antecedentesModal" class="brp-modal">
     <div class="brp-modal-content">
       <button class="brp-modal-close" id="closeAntecedentes">&times;</button>
       <h2>🔍 BUSCAR ANTECEDENTES CRIMINAIS</h2>
-      
       <div class="brp-modal-inputs">
         <label>
           ID do Acusado (Passaporte):
@@ -106,17 +106,14 @@
         </label>
         <button class="brp-btn-modal" id="btnBuscarAntecedentes">BUSCAR</button>
       </div>
-
       <div id="resultadoAntecedentes" class="brp-resultado"></div>
     </div>
   </div>
 
-  <!-- MODAL BUSCAR FICHA -->
   <div id="fichaModal" class="brp-modal">
     <div class="brp-modal-content">
       <button class="brp-modal-close" id="closeFicha">&times;</button>
       <h2>🔍 BUSCAR FICHA CRIMINAL</h2>
-      
       <div class="brp-modal-inputs">
         <label>
           ID da Ficha:
@@ -124,17 +121,14 @@
         </label>
         <button class="brp-btn-modal" id="btnBuscarFicha">BUSCAR</button>
       </div>
-
       <div id="resultadoFicha" class="brp-resultado"></div>
     </div>
   </div>
 
-  <!-- MODAL BUSCAR POLICIAL -->
   <div id="policialModal" class="brp-modal">
     <div class="brp-modal-content">
       <button class="brp-modal-close" id="closePolicial">&times;</button>
       <h2>🔍 BUSCAR ESTATÍSTICAS DE POLICIAL</h2>
-      
       <div class="brp-modal-inputs">
         <label>
           ID do Policial:
@@ -142,83 +136,106 @@
         </label>
         <button class="brp-btn-modal" id="btnBuscarPolicial">BUSCAR</button>
       </div>
-
       <div id="resultadoPolicial" class="brp-resultado"></div>
     </div>
   </div>
 
-  <!-- MODAL REGISTRAR PRISÃO -->
-<div id="registroModal" class="brp-modal">
-  <div class="brp-modal-content">
-    <button class="brp-modal-close" onclick="document.getElementById('registroModal').style.display='none'">&times;</button>
-    <h2>📝 REGISTRAR PRISÃO</h2>
-    
-    <div class="brp-modal-inputs">
-      <label>ID de quem prendeu:
-        <input type="text" id="prisao_por_id" placeholder="Ex: 1234" required />
-      </label>
-      <label>Nome de quem prendeu:
-        <input type="text" id="prisao_por_nome" placeholder="Ex: João Silva" required />
-      </label>
-      <label>IDs dos policiais envolvidos (separados por vírgula):
-        <input type="text" id="policiais_ids" placeholder="Ex: 1234, 5678" />
-      </label>
-      <label>Nomes dos policiais envolvidos (separados por vírgula):
-        <input type="text" id="policiais_nomes" placeholder="Ex: João Silva, Maria Santos" />
-      </label>
-      <label>Nome do jurídico (se houver):
-        <input type="text" id="juridico_nome" placeholder="Ex: Dr. Carlos" />
-      </label>
-      <label>Relatório da ação:
-        <textarea id="relatorio_acao" rows="5" placeholder="Descreva o que aconteceu..." required></textarea>
-      </label>
+  <div id="registroModal" class="brp-modal">
+    <div class="brp-modal-content">
+      <button class="brp-modal-close" onclick="document.getElementById('registroModal').style.display='none'">&times;</button>
+      <h2>📝 REGISTRAR PRISÃO</h2>
+      <div class="brp-modal-inputs">
+        <label>ID de quem prendeu:
+          <input type="text" id="prisao_por_id" placeholder="Ex: 1234" required />
+        </label>
+        <label>Nome de quem prendeu:
+          <input type="text" id="prisao_por_nome" placeholder="Ex: João Silva" required />
+        </label>
+        <label>IDs dos policiais envolvidos (separados por vírgula):
+          <input type="text" id="policiais_ids" placeholder="Ex: 1234, 5678" />
+        </label>
+        <label>Nomes dos policiais envolvidos (separados por vírgula):
+          <input type="text" id="policiais_nomes" placeholder="Ex: João Silva, Maria Santos" />
+        </label>
+        <label>Nome do jurídico (se houver):
+          <input type="text" id="juridico_nome" placeholder="Ex: Dr. Carlos" />
+        </label>
+        <label>Relatório da ação:
+          <textarea id="relatorio_acao" rows="5" placeholder="Descreva o que aconteceu..." required></textarea>
+        </label>
 
-      <h3>📸 ANEXAR IMAGENS</h3>
-      
-      <div class="brp-paste-area" data-target="foto_inventario">
-        <label>Inventário:</label>
-        <input type="file" id="foto_inventario" accept="image/*" style="display: none;" />
-        <div class="brp-paste-preview">
-          <span>Clique para selecionar ou cole a imagem aqui (Ctrl+V)</span>
+        <h3>📸 ANEXAR IMAGENS</h3>
+        
+        <div class="brp-paste-area" data-target="foto_inventario">
+          <label>Inventário:</label>
+          <input type="file" id="foto_inventario" accept="image/*" style="display: none;" />
+          <div class="brp-paste-preview">
+            <span>Clique para selecionar ou cole a imagem aqui (Ctrl+V)</span>
+          </div>
         </div>
-      </div>
 
-      <div class="brp-paste-area" data-target="foto_mdt">
-        <label>MDT:</label>
-        <input type="file" id="foto_mdt" accept="image/*" style="display: none;" />
-        <div class="brp-paste-preview">
-          <span>Clique para selecionar ou cole a imagem aqui (Ctrl+V)</span>
+        <div class="brp-paste-area" data-target="foto_mdt">
+          <label>MDT:</label>
+          <input type="file" id="foto_mdt" accept="image/*" style="display: none;" />
+          <div class="brp-paste-preview">
+            <span>Clique para selecionar ou cole a imagem aqui (Ctrl+V)</span>
+          </div>
         </div>
-      </div>
 
-      <div class="brp-paste-area" data-target="foto_oab">
-        <label>OAB (se houver):</label>
-        <input type="file" id="foto_oab" accept="image/*" style="display: none;" />
-        <div class="brp-paste-preview">
-          <span>Clique para selecionar ou cole a imagem aqui (Ctrl+V)</span>
+        <div class="brp-paste-area" data-target="foto_oab">
+          <label>OAB (se houver):</label>
+          <input type="file" id="foto_oab" accept="image/*" style="display: none;" />
+          <div class="brp-paste-preview">
+            <span>Clique para selecionar ou cole a imagem aqui (Ctrl+V)</span>
+          </div>
         </div>
-      </div>
 
-      <div class="brp-paste-area" data-target="foto_rg_mask">
-        <label>RG com Máscara:</label>
-        <input type="file" id="foto_rg_mask" accept="image/*" style="display: none;" />
-        <div class="brp-paste-preview">
-          <span>Clique para selecionar ou cole a imagem aqui (Ctrl+V)</span>
+        <div class="brp-paste-area" data-target="foto_rg_mask">
+          <label>RG com Máscara:</label>
+          <input type="file" id="foto_rg_mask" accept="image/*" style="display: none;" />
+          <div class="brp-paste-preview">
+            <span>Clique para selecionar ou cole a imagem aqui (Ctrl+V)</span>
+          </div>
         </div>
-      </div>
 
-      <div class="brp-paste-area" data-target="foto_rg">
-        <label>RG sem Máscara:</label>
-        <input type="file" id="foto_rg" accept="image/*" style="display: none;" />
-        <div class="brp-paste-preview">
-          <span>Clique para selecionar ou cole a imagem aqui (Ctrl+V)</span>
+        <div class="brp-paste-area" data-target="foto_rg">
+          <label>RG sem Máscara:</label>
+          <input type="file" id="foto_rg" accept="image/*" style="display: none;" />
+          <div class="brp-paste-preview">
+            <span>Clique para selecionar ou cole a imagem aqui (Ctrl+V)</span>
+          </div>
         </div>
-      </div>
 
-      <button class="brp-btn-modal" id="enviarRegistro">ENVIAR PRISÃO</button>
+        <button class="brp-btn-modal" id="enviarRegistro">ENVIAR PRISÃO</button>
+      </div>
     </div>
   </div>
-</div>
+
+  <!-- FOOTER -->
+  <footer class="brp-footer">
+    <div class="brp-footer-wave">
+      <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"></path>
+      </svg>
+    </div>
+    
+    <div class="brp-footer-content">
+      <div class="brp-footer-logo">
+        <img src="logo/logobrasil.png" alt="BRP" class="brp-footer-logo-img">
+        <span class="brp-footer-brand">BRASIL ROLEPLAY</span>
+      </div>
+      
+      <div class="brp-footer-info">
+        <p class="brp-footer-title">CALCULADORA PENAL</p>
+        <p class="brp-footer-subtitle">Sistema de Registro Criminal</p>
+      </div>
+
+      <div class="brp-footer-credits">
+        <p>Desenvolvido por <strong>ADM Nathan</strong></p>
+        <p class="brp-footer-copyright">© 2025 BRP — Todos os direitos reservados.</p>
+      </div>
+    </div>
+  </footer>
 
   <script src="data.js" defer></script>
   <script src="app.js" defer></script>
